@@ -1,27 +1,25 @@
-// 환경변수(클라이언트): 공개 가능한 anon 키 사용
-// 배포 전 아래 두 값을 실제 프로젝트 값으로 교체
 const SUPABASE_URL = "https://glculvahppprsyzfctya.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdsY3VsdmFocHBwcnN5emZjdHlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxODAxMTAsImV4cCI6MjA3Mzc1NjExMH0.KEZD6PblJWEy0YXOHD5zujzrpjbW3S98f5VgNWVHVzE";
 
-const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const btn = document.getElementById('btn');
-const kwEl = document.getElementById('kw');
-const spinner = document.getElementById('spinner');
-const resultEl = document.getElementById('result');
-const listEl = document.getElementById('list');
+// --- DOM ---
+const btn = document.getElementById("btn");
+const kwEl = document.getElementById("kw");
+const spinner = document.getElementById("spinner");
+const resultEl = document.getElementById("result");
+const listEl = document.getElementById("list");
 
-function showSpinner(v) {
-  spinner.classList.toggle('hidden', !v);
+function showSpinner(on) {
+  spinner.classList.toggle("hidden", !on);
 }
-
-function renderList(items) {
-  if (!items || !items.length) { listEl.innerHTML = ""; return; }
-  const html = items.slice(0, 10).map(r => `<li>${r.민원분야} <small>(빈도 ${r.cnt})</small></li>`).join("");
+function renderList(pairs) {
+  if (!pairs?.length) { listEl.innerHTML = ""; return; }
+  const html = pairs.slice(0, 10).map(([k, v]) => `<li>${k} <small>(빈도 ${v})</small></li>`).join("");
   listEl.innerHTML = `<ol>${html}</ol>`;
 }
 
-btn.addEventListener('click', async () => {
+async function runSearch() {
   const kw = (kwEl.value || "").trim();
   resultEl.textContent = "";
   renderList([]);
@@ -29,36 +27,36 @@ btn.addEventListener('click', async () => {
 
   showSpinner(true);
   try {
-    // 전략 A: 서버 집계 사용 (PostgREST 그룹바이)
-    // 테이블 이름: dasan_cases (스키마 동일)
-    // select=민원분야,count:민원분야 -> group=민원분야
-    const { data, error } = await _supabase
-      .from('dasan_cases')
-      .select('민원분야, count:민원분야', { head: false })
-      .ilike('질문내용', `%${kw}%`)
-      .group('민원분야')
-      .order('count', { ascending: false });
+    // 서버 집계 .group() 없음 → 클라이언트에서 그룹핑
+    const { data, error } = await supa
+      .from("dasan_cases")
+      .select("민원분야, 질문내용")     // 필요한 컬럼만
+      .ilike("질문내용", `%${kw}%`);   // 대소문자 무시 부분일치
 
     if (error) throw error;
-
     if (!data || data.length === 0) {
-      resultEl.textContent = `추천 분야: 결과 없음`;
-      showSpinner(false);
+      resultEl.textContent = "추천 분야: 결과 없음";
       return;
     }
 
-    // 상위 1개 추천
-    const top = data[0];
-    resultEl.textContent = `추천 분야: ${top.민원분야}`;
-    renderList(data.map(d => ({ 민원분야: d.민원분야, cnt: d.count })));
+    // 그룹핑 및 정렬
+    const counts = data.reduce((acc, r) => {
+      const k = r["민원분야"];
+      acc[k] = (acc[k] || 0) + 1;
+      return acc;
+    }, {});
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    const [topField] = sorted[0];
 
+    resultEl.textContent = `추천 분야: ${topField}`;
+    renderList(sorted);
   } catch (e) {
     console.error(e);
     resultEl.textContent = "오류가 발생했습니다. 콘솔을 확인하세요.";
   } finally {
     showSpinner(false);
   }
-});
+}
 
-// Enter key
-kwEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') btn.click(); });
+btn.addEventListener("click", runSearch);
+kwEl.addEventListener("keydown", (e) => { if (e.key === "Enter") runSearch(); });
