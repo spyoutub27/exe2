@@ -1,7 +1,7 @@
 // 환경변수(클라이언트): 공개 가능한 anon 키 사용
 // 배포 전 아래 두 값을 실제 프로젝트 값으로 교체
-const SUPABASE_URL = window.SUPABASE_URL || (import.meta?.env?.VITE_SUPABASE_URL) || "https://glculvahppprsyzfctya.supabase.co";
-const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || (import.meta?.env?.VITE_SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdsY3VsdmFocHBwcnN5emZjdHlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxODAxMTAsImV4cCI6MjA3Mzc1NjExMH0.KEZD6PblJWEy0YXOHD5zujzrpjbW3S98f5VgNWVHVzE";
+const SUPABASE_URL = "https://glculvahppprsyzfctya.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdsY3VsdmFocHBwcnN5emZjdHlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxODAxMTAsImV4cCI6MjA3Mzc1NjExMH0.KEZD6PblJWEy0YXOHD5zujzrpjbW3S98f5VgNWVHVzE";
 
 const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
