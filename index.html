@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>민원 분야 추천</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>다산콜센터 민원 분야 추천</h1>
+    <div class="search-box">
+      <input id="kw" type="text" placeholder="키워드 입력 (예: 주차)" />
+      <button id="btn">검색</button>
+    </div>
+
+    <div id="spinner" class="spinner hidden"></div>
+    <div id="result" class="result"></div>
+    <div id="list" class="list"></div>
+
+    <footer>
+      <small>환경변수 설정: <code>.env</code>의 <code>VITE_SUPABASE_URL</code>, <code>VITE_SUPABASE_ANON_KEY</code>를 채워주세요.</small>
+    </footer>
+  </div>
+</body>
+</html>
